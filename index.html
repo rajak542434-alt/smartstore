@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>My Smart Affiliate Store</title>
+    <title>My Smart Shopping Store</title>
     <style>
         body { font-family: 'Arial', sans-serif; background: #f4f7f6; margin: 0; padding: 10px; }
         header { background: #333; color: white; padding: 15px; text-align: center; font-size: 20px; font-weight: bold; }
@@ -12,33 +12,97 @@
         .product-card img { max-width: 100%; height: 200px; object-fit: contain; border-radius: 5px; }
         .product-title { font-size: 16px; font-weight: bold; margin: 10px 0; color: #333; height: 40px; overflow: hidden; }
         .product-price { color: #b12704; font-size: 18px; font-weight: bold; margin-bottom: 15px; }
-        .buy-btn { display: block; color: white; text-decoration: none; padding: 10px; border-radius: 5px; font-weight: bold; font-size: 14px; margin-top: 5px; }
+        .buy-btn { display: block; color: white; text-decoration: none; padding: 10px; border-radius: 5px; font-weight: bold; font-size: 14px; margin-top: 5px; background: #ff9900; cursor: pointer; }
+        
+        /* Form Styling */
+        .order-modal { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); justify-content: center; align-items: center; z-index: 1000; }
+        .form-container { background: white; padding: 20px; border-radius: 8px; width: 90%; max-width: 400px; text-align: left; box-shadow: 0 4px 10px rgba(0,0,0,0.3); }
+        .form-container h2 { margin-top: 0; font-size: 18px; color: #333; }
+        .form-container input, .form-container textarea { width: 100%; padding: 10px; margin: 10px 0; border: 1px solid #ccc; border-radius: 4px; box-sizing: border-box; }
+        .submit-btn { background: #28a745; color: white; border: none; padding: 12px; width: 100%; border-radius: 4px; font-weight: bold; cursor: pointer; font-size: 16px; }
+        .close-btn { background: #dc3545; color: white; border: none; padding: 8px; margin-top: 10px; width: 100%; border-radius: 4px; cursor: pointer; }
     </style>
 </head>
 <body>
 
-    <header>🛒 My Smart Affiliate Store</header>
+    <header>🛒 My Smart Shopping Store</header>
 
     <div class="store-container">
         
-        <!-- प्रोडक्ट 1: ट्रेंडी कुर्ती (Meesho) -->
+        <!-- प्रोडक्ट 1 -->
         <div class="product-card">
             <img src="https://unsplash.com" alt="Product 1">
-            <div class="product-title">Trendy Ethnic Wear Anarkali Kurti</div>
-            <div class="product-price">₹499</div>
-            <a href="YOUR_MEESHO_LINK_1" target="_blank" class="buy-btn" style="background: #f43397;">Buy from Meesho</a>
+            <div class="product-title" id="p1-title">Trendy Ethnic Wear Anarkali Kurti</div>
+            <div class="product-price" id="p1-price">₹499</div>
+            <button class="buy-btn" onclick="openOrderForm('Trendy Ethnic Wear Anarkali Kurti', '₹499')">Buy Now (Cash on Delivery)</button>
         </div>
 
-        <!-- Produkt 2: मेन्स शर्ट (Flipkart) -->
+        <!-- प्रोडक्ट 2 -->
         <div class="product-card">
             <img src="https://unsplash.com" alt="Product 2">
-            <div class="product-title">Waterproof Men's Hair Trimmer</div>
-            <div class="product-price">₹799</div>
-            <a href="YOUR_FLIPKART_LINK_1" target="_blank" class="buy-btn" style="background: #2874f0;">Buy from Flipkart</a>
+            <div class="product-title" id="p2-title">Waterproof Men's Hair Trimmer</div>
+            <div class="product-price" id="p2-price">₹799</div>
+            <button class="buy-btn" onclick="openOrderForm('Waterproof Men\'s Hair Trimmer', '₹799')">Buy Now (Cash on Delivery)</button>
         </div>
 
     </div>
 
+    <!-- Order Form Popup -->
+    <div id="orderModal" class="order-modal">
+        <div class="form-container">
+            <h2 id="form-product-title">Order Details</h2>
+            <input type="text" id="custName" placeholder="आपका पूरा नाम (Your Name)" required>
+            <input type="tel" id="custPhone" placeholder="मोबाइल नंबर (Mobile Number)" required>
+            <textarea id="custAddress" placeholder="पूरा पता: मकान नंबर, गली, शहर, पिनकोड (Full Address with Pincode)" rows="4" required></textarea>
+            <button class="submit-btn" onclick="sendOrder()">Confirm Order (WhatsApp)</button>
+            <button class="close-btn" onclick="closeOrderForm()">Cancel</button>
+        </div>
+    </div>
+
+    <script>
+        var selectedProduct = "";
+        var selectedPrice = "";
+
+        // यहाँ अपना असली व्हाट्सएप नंबर डालें (Country code 91 के साथ, बिना '+' या 'स्पेस' के)
+        var myWhatsAppNumber = " 91 6205472606"; 
+
+        function openOrderForm(title, price) {
+            selectedProduct = title;
+            selectedPrice = price;
+            document.getElementById("form-product-title").innerText = "Order: " + title + " (" + price + ")";
+            document.getElementById("orderModal").style.display = "flex";
+        }
+
+        function closeOrderForm() {
+            document.getElementById("orderModal").style.display = "none";
+        }
+
+        function sendOrder() {
+            var name = document.getElementById("custName").value;
+            var phone = document.getElementById("custPhone").value;
+            var address = document.getElementById("custAddress").value;
+
+            if(name.trim() === "" || phone.trim() === "" || address.trim() === "") {
+                alert("कृपया सभी जानकारी सही से भरें!");
+                return;
+            }
+
+            // व्हाट्सएप मैसेज का फॉर्मेट तैयार करना
+            var message = "🚨 *NEW ORDER RECEIVED* 🚨\n\n" +
+                          "📦 *Product:* " + selectedProduct + "\n" +
+                          "💰 *Price:* " + selectedPrice + "\n\n" +
+                          "👤 *Customer Name:* " + name + "\n" +
+                          "📞 *Phone:* " + phone + "\n" +
+                          "📍 *Address:* " + address + "\n\n" +
+                          " Please confirm this order on Cash on Delivery.";
+
+            // व्हाट्सएप पर रिडायरेक्ट करना
+            var whatsappUrl = "https://whatsapp.com" + myWhatsAppNumber + "&text=" + encodeURIComponent(message);
+            window.open(whatsappUrl, '_blank');
+            closeOrderForm();
+        }
+    </script>
 </body>
 </html>
+
 
