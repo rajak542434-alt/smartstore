@@ -46,47 +46,50 @@
     <script>
         const MY_WHATSAPP = "916205472606"; 
         const SHEET_ID = '1ztj34lWtk1Kjmv9A8wlkZk9DNFIRGSXx-C1kYEBByRw'; 
-        const SHEET_TITLE = 'Sheet1'; 
         
-        const url = `https://google.com{SHEET_ID}/gviz/tq?tqx=out:csv&sheet=${SHEET_TITLE}`;
+        // सीधे गूगल के विज़ुअलाइज़ेशन API का उपयोग (यह 100% सटीक लोड करेगा)
+        const url = `https://google.com{SHEET_ID}/gviz/tq?tqx=out:json`;
 
         var selectedProduct = "";
         var selectedPrice = "";
 
         fetch(url)
             .then(res => res.text())
-            .then(data => {
+            .then(txt => {
+                // गूगल के अजीब JSON फॉर्मेट को साफ़ करना
+                const jsonString = txt.substring(txt.indexOf("{"), txt.lastIndexOf("}") + 1);
+                const data = JSON.parse(jsonString);
+                
                 document.getElementById('loading').style.display = 'none';
                 const grid = document.getElementById('products-grid');
                 
-                // गूगल शीट का डेटा साफ़ तरीके से लोड करने के लिए
-                const lines = data.split('\n');
-                for (let i = 1; i < lines.length; i++) {
-                    const line = lines[i].trim();
-                    if (!line) continue;
+                const rows = data.table.rows;
+                
+                // पहली लाइन हेडिंग है, इसलिए i=1 से शुरू करेंगे
+                for (let i = 1; i < rows.length; i++) {
+                    const row = rows[i].c;
+                    if (!row || !row[0]) continue;
                     
-                    const columns = line.split(/,(?=(?:(?:[^"]*"){2})*[^"]*$)/);
-                    if (columns.length >= 3) {
-                        const title = columns[0].replace(/^"|"$/g, '').trim();
-                        const price = columns[1].replace(/^"|"$/g, '').trim();
-                        const image = columns[2].replace(/^"|"$/g, '').trim();
-
-                        if(title !== "" && title !== "title") {
-                            const card = document.createElement('div');
-                            card.className = 'product-card';
-                            card.innerHTML = `
-                                <img src="${image}" alt="${title}">
-                                <div class="product-title">${title}</div>
-                                <div class="product-price">Price: ₹${price}</div>
-                                <button class="buy-btn" onclick="openOrderForm('${title.replace(/'/g, "\\'")}', '₹${price}')">Buy Now (Cash on Delivery)</button>
-                            `;
-                            grid.appendChild(card);
-                        }
+                    const title = row[0] ? row[0].v : "";
+                    const price = row[1] ? row[1].v : "";
+                    const image = row[2] ? row[2].v : "https://unsplash.com";
+                    
+                    if(title.trim() !== "") {
+                        const card = document.createElement('div');
+                        card.className = 'product-card';
+                        card.innerHTML = `
+                            <img src="${image}" alt="${title}">
+                            <div class="product-title">${title}</div>
+                            <div class="product-price">Price: ₹${price}</div>
+                            <button class="buy-btn" onclick="openOrderForm('${title.replace(/'/g, "\\'")}', '₹${price}')">Buy Now (Cash on Delivery)</button>
+                        `;
+                        grid.appendChild(card);
                     }
                 }
             })
             .catch(err => {
-                document.getElementById('loading').innerText = 'Products load होने में समस्या आई।';
+                document.getElementById('loading').innerText = 'Products load होने में समस्या आई। कृपया इंटरनेट चेक करें।';
+                console.error(err);
             });
 
         function openOrderForm(title, price) {
