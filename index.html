@@ -15,7 +15,7 @@
         .buy-btn { display: block; color: white; text-decoration: none; padding: 12px; border-radius: 5px; font-weight: bold; font-size: 14px; background: #ff9900; border: none; width: 100%; cursor: pointer; }
         #loading { text-align: center; font-size: 18px; color: #666; margin-top: 50px; }
         
-        /* Order Form Popup Styling */
+        /* Form Popup Styling */
         .order-modal { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); justify-content: center; align-items: center; z-index: 1000; }
         .form-container { background: white; padding: 20px; border-radius: 8px; width: 90%; max-width: 400px; text-align: left; box-shadow: 0 4px 10px rgba(0,0,0,0.3); }
         .form-container h2 { margin-top: 0; font-size: 18px; color: #333; }
@@ -44,10 +44,7 @@
     </div>
 
     <script>
-        // 🎯 आपका असली व्हाट्सएप नंबर यहाँ सेट कर दिया है
         const MY_WHATSAPP = "916205472606"; 
-
-        // आपकी Google Sheet ID यहाँ सेट है
         const SHEET_ID = '1ztj34lWtk1Kjmv9A8wlkZk9DNFIRGSXx-C1kYEBByRw'; 
         const SHEET_TITLE = 'Sheet1'; 
         
@@ -60,40 +57,36 @@
             .then(res => res.text())
             .then(data => {
                 document.getElementById('loading').style.display = 'none';
-                
-                const rows = [];
-                const lines = data.split('\n').slice(1);
-                lines.forEach(line => {
-                    const columns = line.split(/,(?=(?:(?:[^"]*"){2})*[^"]*$)/);
-                    if (columns.length >= 2) {
-                        rows.push(columns);
-                    }
-                });
-
                 const grid = document.getElementById('products-grid');
+                
+                // गूगल शीट का डेटा साफ़ तरीके से लोड करने के लिए
+                const lines = data.split('\n');
+                for (let i = 1; i < lines.length; i++) {
+                    const line = lines[i].trim();
+                    if (!line) continue;
+                    
+                    const columns = line.split(/,(?=(?:(?:[^"]*"){2})*[^"]*$)/);
+                    if (columns.length >= 3) {
+                        const title = columns[0].replace(/^"|"$/g, '').trim();
+                        const price = columns[1].replace(/^"|"$/g, '').trim();
+                        const image = columns[2].replace(/^"|"$/g, '').trim();
 
-                rows.forEach(columns => {
-                    if (columns.length >= 2) {
-                        const title = columns[0] ? columns[0].replace(/^"|"$/g, '').trim() : "";
-                        const price = columns[1] ? columns[1].replace(/^"|"$/g, '').trim() : "";
-                        const image = columns[2] ? columns[2].replace(/^"|"$/g, '').trim() : "https://unsplash.com";
-                        
                         if(title !== "" && title !== "title") {
                             const card = document.createElement('div');
                             card.className = 'product-card';
                             card.innerHTML = `
                                 <img src="${image}" alt="${title}">
                                 <div class="product-title">${title}</div>
-                                <div class="product-price">Price: ${price}</div>
-                                <button class="buy-btn" onclick="openOrderForm('${title.replace(/'/g, "\\'")}', '${price}')">Buy Now (Cash on Delivery)</button>
+                                <div class="product-price">Price: ₹${price}</div>
+                                <button class="buy-btn" onclick="openOrderForm('${title.replace(/'/g, "\\'")}', '₹${price}')">Buy Now (Cash on Delivery)</button>
                             `;
                             grid.appendChild(card);
                         }
                     }
-                });
+                }
             })
             .catch(err => {
-                document.getElementById('loading').innerText = 'Products load होने में समस्या आई। कृपया Sheet Check करें।';
+                document.getElementById('loading').innerText = 'Products load होने में समस्या आई।';
             });
 
         function openOrderForm(title, price) {
@@ -132,4 +125,3 @@
     </script>
 </body>
 </html>
-
